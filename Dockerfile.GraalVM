@@ -1,0 +1,26 @@
+#base JDK Image for GraalVM
+FROM openjdk:17
+
+RUN mkdir app
+COPY /target/native-image-test-with-java-native-code-1.0-SNAPSHOT-jar-with-dependencies.jar /app
+
+WORKDIR /app
+
+# remove JDK and Install Graalvm
+RUN rm -rfv /usr/java/openjdk-17 \
+    && rm -rfv /usr/java/default \
+    && rm -rfv /usr/java/latest \
+    && ls /usr/java \
+    && curl -LO https://github.com/graalvm/graalvm-ce-builds/releases/download/vm-22.3.1/graalvm-ce-java17-linux-amd64-22.3.1.tar.gz \
+    && tar -xzf graalvm-ce-java17-linux-amd64-22.3.1.tar.gz -C /usr/java \
+    && export GRAALVM_HOME=/usr/java/graalvm-ce-java17-22.3.1/ \
+    && export JAVA_HOME=$GRAALVM_HOME \
+    && export PATH=$JAVA_HOME/bin:$PATH \
+    && java --version \
+    && rm -rfv graalvm-ce-java17-linux-amd64-22.3.1.tar.gz \
+
+RUN java --version
+
+ENV JAVA_HOME /usr/java/graalvm-ce-java17-22.3.1/
+
+ENTRYPOINT ["/usr/java/graalvm-ce-java17-22.3.1/bin/java", "-jar", "native-image-test-with-java-native-code-1.0-SNAPSHOT-jar-with-dependencies.jar"]
